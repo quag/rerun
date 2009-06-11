@@ -16,4 +16,4 @@ The python port of the rerun shell script is in rerun.py. Usage is the same, exc
 
 Clean ups, extensions and other improvements are welcome.
 
-The original rerun script was posted by Ward Cunningham in January 2004 to [http://c2.com/~ward/io/IoGame/rerun]{http://c2.com/~ward/io/IoGame/rerun} and its purpose described at the bottom of the [IoGame]{http://c2.com/~ward/io/IoGame/} page.
+The original rerun script was posted by Ward Cunningham in January 2004 to http://c2.com/~ward/io/IoGame/rerun and its purpose described at the bottom of the http://c2.com/~ward/io/IoGame/ page.
