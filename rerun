@@ -1,12 +1,16 @@
+#!/bin/bash
+
 while true
 do
 	if test $1 -nt .lastRun
 	then
 		kill `cat .lastRun`
+        sleep 0.1
 		./$1&
 		echo $! started
 		diff $1~ $1
 		cp $1 $1~
 		echo $! > .lastRun
 	fi
+    sleep 0.5
 done
