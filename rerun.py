@@ -7,49 +7,54 @@ import difflib
 import signal
 import subprocess
 
-def _kill(process):
-    try:
-        process.terminate()
-    except:
-        # Fall back for pre-2.6, but only works on Unix platforms
-        os.kill(process.pid, signal.SIGTERM)
+class Script:
+    def __init__(self, path):
+        self.path = os.path.abspath(path)
+        self.process = None
 
-def _readlines(path):
-    f = file(path)
-    lines = f.readlines()
-    f.close
-    return lines
+    def start(self):
+        self.process = subprocess.Popen(self.path)
+
+    def stop(self):
+        if self.process:
+            try:
+                self.process.terminate()
+            except:
+                # Fall back for pre-2.6, but only works on Unix platforms
+                os.kill(self.process.pid, signal.SIGTERM)
+            self.process = None
+
+    def contents(self):
+        f = file(self.path)
+        lines = f.readlines()
+        f.close
+        return lines
 
 def _snapshot(name, timestamp):
     return "%s (%s)" % (name, time.asctime(time.localtime(timestamp)))
 
-def rerun(script):
+def rerun(scriptfile):
     try:
-        scriptpath = os.path.abspath(script)
-
-        process = None
+        script = Script(scriptfile)
         lastrun = 0
         lastcontents = None
 
         while True:
-            lastmodified = os.stat(script).st_mtime
+            lastmodified = os.stat(scriptfile).st_mtime
 
             if lastmodified > lastrun:
-
-                if process:
-                    _kill(process)
-
-                contents = _readlines(script)
+                script.stop()
+                contents = script.contents()
 
                 if lastcontents:
                     print
-                    print "".join(difflib.unified_diff(lastcontents, contents, fromfile=_snapshot(script, lastrun), tofile=_snapshot(script, lastmodified)))
+                    print "".join(difflib.unified_diff(lastcontents, contents, fromfile=_snapshot(scriptfile, lastrun), tofile=_snapshot(scriptfile, lastmodified)))
 
                 lastcontents = contents
 
-                process = subprocess.Popen(scriptpath)
+                script.start()
 
-                print "###", _snapshot(script, lastmodified), "started ###"
+                print "###", _snapshot(scriptfile, lastmodified), "started ###"
 
                 lastrun = lastmodified
 
