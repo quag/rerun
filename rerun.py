@@ -3,19 +3,9 @@
 import os
 import sys
 import time
-import shutil
 import difflib
 import signal
 import subprocess
-
-def printDiff(file1, file2):
-    f1 = file(file1)
-    f2 = file(file2)
-
-    print "".join(difflib.unified_diff(f1.readlines(), f2.readlines()))
-
-    f1.close()
-    f2.close()
 
 def kill(process):
     try:
@@ -24,29 +14,45 @@ def kill(process):
         # Fall back for pre-2.6, but only works on Unix platforms
         os.kill(process.pid, signal.SIGTERM)
 
+def readlines(path):
+    f = file(path)
+    lines = f.readlines()
+    f.close
+    return lines
+
+def diffname(name, timestamp):
+    return time.asctime(time.localtime(timestamp)) + " " + name
+
 if __name__ == "__main__":
     try:
-        script = os.path.abspath(sys.argv[1])
-        backup = script + "~"
+        script = sys.argv[1]
+        scriptpath = os.path.abspath(script)
 
         process = None
         lastrun = 0
+        lastcontents = None
 
         while True:
             lastmodified = os.stat(script).st_mtime
 
             if lastmodified > lastrun:
-                lastrun = lastmodified
 
                 if process:
                     kill(process)
-                    printDiff(backup, script)
 
-                shutil.copyfile(script, backup)
+                contents = readlines(script)
 
-                process = subprocess.Popen(script)
+                if lastcontents:
+                    print
+                    print "".join(difflib.unified_diff(lastcontents, contents, fromfile=diffname(script, lastrun), tofile=diffname(script, lastmodified)))
+
+                lastcontents = contents
+
+                process = subprocess.Popen(scriptpath)
 
                 print "###", script, "started ###"
+
+                lastrun = lastmodified
 
             time.sleep(0.5)
     except KeyboardInterrupt:
