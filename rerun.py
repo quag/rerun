@@ -8,8 +8,9 @@ import signal
 import subprocess
 
 class Script:
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
+    def __init__(self, name):
+        self.name = name
+        self.path = os.path.abspath(name)
         self.process = None
 
     def start(self):
@@ -24,43 +25,48 @@ class Script:
                 os.kill(self.process.pid, signal.SIGTERM)
             self.process = None
 
+    def snapshot(self):
+        return ScriptSnapshot(self.name, self.modifiedtime(), self.contents())
+
+    def modifiedtime(self):
+        return os.stat(self.path).st_mtime
+
     def contents(self):
         f = file(self.path)
-        lines = f.readlines()
-        f.close
-        return lines
+        try:
+            return f.readlines()
+        finally:
+            f.close()
 
-def _snapshot(name, timestamp):
-    return "%s (%s)" % (name, time.asctime(time.localtime(timestamp)))
+class ScriptSnapshot:
+    def __init__(self, name, modifiedtime, contents):
+        self.name = "%s (%s)" % (name, time.asctime(time.localtime(modifiedtime)))
+        self.modifiedtime = modifiedtime
+        self.contents = contents
+
+    def diff(self, snapshot):
+        return "".join(difflib.unified_diff(self.contents, snapshot.contents, fromfile=self.name, tofile=snapshot.name))
 
 def rerun(scriptfile):
-    try:
-        script = Script(scriptfile)
-        lastrun = 0
-        lastcontents = None
+    script = Script(scriptfile)
+    lastsnapshot = None
 
-        while True:
-            lastmodified = os.stat(scriptfile).st_mtime
+    while True:
+        if lastsnapshot == None or script.modifiedtime() != lastsnapshot.modifiedtime:
+            script.stop()
 
-            if lastmodified > lastrun:
-                script.stop()
-                contents = script.contents()
+            snapshot = script.snapshot()
+            if lastsnapshot:
+                print "\n", lastsnapshot.diff(snapshot)
+            lastsnapshot = snapshot
 
-                if lastcontents:
-                    print
-                    print "".join(difflib.unified_diff(lastcontents, contents, fromfile=_snapshot(scriptfile, lastrun), tofile=_snapshot(scriptfile, lastmodified)))
+            script.start()
+            print "###", snapshot.name, "started ###"
 
-                lastcontents = contents
-
-                script.start()
-
-                print "###", _snapshot(scriptfile, lastmodified), "started ###"
-
-                lastrun = lastmodified
-
-            time.sleep(0.5)
-    except KeyboardInterrupt:
-        print
+        time.sleep(0.5)
 
 if __name__ == "__main__":
-    rerun(sys.argv[1])
+    try:
+        rerun(sys.argv[1])
+    except KeyboardInterrupt:
+        print
