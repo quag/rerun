@@ -1,8 +1,4 @@
 #!/usr/bin/env python
 
-def heh():
-    print "heh"
-
-for i in range(1, 3):
-    heh()
-
+for i in range(0, 3):
+    print "heh (%s)" % __file__
