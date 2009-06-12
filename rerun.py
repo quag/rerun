@@ -5,6 +5,8 @@ import sys
 import time
 import shutil
 import difflib
+import signal
+import subprocess
 
 def printDiff(file1, file2):
     f1 = file(file1)
@@ -15,25 +17,32 @@ def printDiff(file1, file2):
     f1.close()
     f2.close()
 
+def kill(process):
+    try:
+        process.terminate()
+    except:
+        # Fall back for pre-2.6, but only works on Unix platforms
+        os.kill(process.pid, signal.SIGTERM)
+
 if __name__ == "__main__":
     try:
-        script = sys.argv[1]
+        script = os.path.abspath(sys.argv[1])
         scriptbackup = script + "~"
 
-        pid = None
+        process = None
         lastrun = 0
 
         while True:
             mtime = os.stat(script).st_mtime
 
             if mtime > lastrun:
-                if pid:
-                    os.kill(pid, 15) # SIGTERM: 15
+                if process:
+                    kill(process)
                     printDiff(scriptbackup, script)
 
                 shutil.copyfile(script, scriptbackup)
 
-                pid = os.spawnl(os.P_NOWAIT, script)
+                process = subprocess.Popen(script)
                 lastrun = mtime
 
                 print "###", script, "started ###"
