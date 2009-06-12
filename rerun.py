@@ -27,23 +27,24 @@ def kill(process):
 if __name__ == "__main__":
     try:
         script = os.path.abspath(sys.argv[1])
-        scriptbackup = script + "~"
+        backup = script + "~"
 
         process = None
         lastrun = 0
 
         while True:
-            mtime = os.stat(script).st_mtime
+            lastmodified = os.stat(script).st_mtime
 
-            if mtime > lastrun:
+            if lastmodified > lastrun:
+                lastrun = lastmodified
+
                 if process:
                     kill(process)
-                    printDiff(scriptbackup, script)
+                    printDiff(backup, script)
 
-                shutil.copyfile(script, scriptbackup)
+                shutil.copyfile(script, backup)
 
                 process = subprocess.Popen(script)
-                lastrun = mtime
 
                 print "###", script, "started ###"
 
