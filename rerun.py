@@ -20,8 +20,8 @@ def readlines(path):
     f.close
     return lines
 
-def diffname(name, timestamp):
-    return time.asctime(time.localtime(timestamp)) + " " + name
+def snapshot(name, timestamp):
+    return "%s (%s)" % (name, time.asctime(time.localtime(timestamp)))
 
 if __name__ == "__main__":
     try:
@@ -44,13 +44,13 @@ if __name__ == "__main__":
 
                 if lastcontents:
                     print
-                    print "".join(difflib.unified_diff(lastcontents, contents, fromfile=diffname(script, lastrun), tofile=diffname(script, lastmodified)))
+                    print "".join(difflib.unified_diff(lastcontents, contents, fromfile=snapshot(script, lastrun), tofile=snapshot(script, lastmodified)))
 
                 lastcontents = contents
 
                 process = subprocess.Popen(scriptpath)
 
-                print "###", script, "started ###"
+                print "###", snapshot(script, lastmodified), "started ###"
 
                 lastrun = lastmodified
 

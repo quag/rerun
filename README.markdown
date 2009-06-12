@@ -17,3 +17,45 @@ The python port of the rerun shell script is in rerun.py. Usage is the same, exc
 Clean ups, extensions and other improvements are welcome.
 
 The original rerun script was posted by Ward Cunningham in January 2004 to http://c2.com/~ward/io/IoGame/rerun and its purpose described at the bottom of the http://c2.com/~ward/io/IoGame/ page.
+
+An example run (annotated):
+
+    $ ./rerun.py test.py
+
+Rerun is started, and test.py is run for the first time.
+
+    ### test.py (Fri Jun 12 22:23:22 2009) started ###
+    heh
+    heh
+
+The repeats are changed from 2 to 3, and test.py is saved. It reruns and prints:
+
+    --- test.py (Fri Jun 12 22:23:22 2009) 
+    +++ test.py (Fri Jun 12 22:24:55 2009) 
+    @@ -1,4 +1,4 @@
+     #!/usr/bin/env python
+     
+    -for i in range(0, 2):
+    +for i in range(0, 3):
+         print "heh"
+
+    ### test.py (Fri Jun 12 22:24:55 2009) started ###
+    heh
+    heh
+    heh
+
+The string to print is edited, and once more the script is automatically rerun.
+
+    --- test.py (Fri Jun 12 22:24:55 2009) 
+    +++ test.py (Fri Jun 12 22:25:01 2009) 
+    @@ -1,4 +1,4 @@
+     #!/usr/bin/env python
+     
+     for i in range(0, 3):
+    -    print "heh"
+    +    print "ho ho ho"
+
+    ### test.py (Fri Jun 12 22:25:01 2009) started ###
+    ho ho ho
+    ho ho ho
+    ho ho ho
