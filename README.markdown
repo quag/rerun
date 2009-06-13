@@ -28,6 +28,7 @@ Rerun is started, and test.py is run for the first time.
     ### test.py (Fri Jun 12 22:23:22 2009) started ###
     heh
     heh
+    ### test.py (Fri Jun 12 22:23:22 2009) finished (exit status: 0) ###
 
 The repeats are changed from 2 to 3, and test.py is saved. It reruns and prints:
 
@@ -44,6 +45,7 @@ The repeats are changed from 2 to 3, and test.py is saved. It reruns and prints:
     heh
     heh
     heh
+    ### test.py (Fri Jun 12 22:24:55 2009) finished (exit status: 0) ###
 
 The string to print is edited, and once more the script is automatically rerun.
 
@@ -60,3 +62,4 @@ The string to print is edited, and once more the script is automatically rerun.
     ho ho ho
     ho ho ho
     ho ho ho
+    ### test.py (Fri Jun 12 22:25:01 2009) finished (exit status: 0) ###

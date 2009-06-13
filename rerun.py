@@ -20,10 +20,25 @@ class Script:
         if self.process:
             try:
                 self.process.terminate()
+                self.process.wait()
             except:
                 # Fall back for pre-2.6, but only works on Unix platforms
                 os.kill(self.process.pid, signal.SIGTERM)
+                os.waitpid(self.process.pid, 0)
             self.process = None
+
+    def running(self):
+        return self.process != None and self.process.poll() == None
+
+    def poll(self):
+        if self.process == None:
+            return None
+        else:
+            returncode = self.process.poll()
+            if returncode != None:
+                self.process = None
+
+            return returncode
 
     def snapshot(self):
         return ScriptSnapshot(self.name, self.modifiedtime(), self.contents())
@@ -53,7 +68,9 @@ def rerun(scriptfile):
 
     while True:
         if lastsnapshot == None or script.modifiedtime() != lastsnapshot.modifiedtime:
-            script.stop()
+            if script.running():
+                script.stop()
+                print "### %s stopped ###" % snapshot.name
 
             snapshot = script.snapshot()
             if lastsnapshot:
@@ -61,7 +78,12 @@ def rerun(scriptfile):
             lastsnapshot = snapshot
 
             script.start()
-            print "###", snapshot.name, "started ###"
+            print "### %s started ###" % snapshot.name
+            time.sleep(0.1)
+
+        returncode = script.poll()
+        if returncode != None:
+            print "### %s finished (exit status: %s) ###" % (snapshot.name, returncode)
 
         time.sleep(0.5)
 
