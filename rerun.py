@@ -66,26 +66,31 @@ def rerun(scriptfile):
     script = Script(scriptfile)
     lastsnapshot = None
 
-    while True:
-        if lastsnapshot == None or script.modifiedtime() != lastsnapshot.modifiedtime:
-            if script.running():
-                script.stop()
-                print "### %s stopped ###" % snapshot.name
+    try:
+        while True:
+            if lastsnapshot == None or script.modifiedtime() != lastsnapshot.modifiedtime:
+                if script.running():
+                    script.stop()
+                    print "### %s stopped ###" % snapshot.name
 
-            snapshot = script.snapshot()
-            if lastsnapshot:
-                print "\n", lastsnapshot.diff(snapshot)
-            lastsnapshot = snapshot
+                snapshot = script.snapshot()
+                if lastsnapshot:
+                    print "\n", lastsnapshot.diff(snapshot)
+                lastsnapshot = snapshot
 
-            script.start()
-            print "### %s started ###" % snapshot.name
-            time.sleep(0.1)
+                script.start()
+                print "### %s started ###" % snapshot.name
+                time.sleep(0.1)
 
-        returncode = script.poll()
-        if returncode != None:
-            print "### %s finished (exit status: %s) ###" % (snapshot.name, returncode)
+            returncode = script.poll()
+            if returncode != None:
+                print "### %s finished (exit status: %s) ###" % (snapshot.name, returncode)
 
-        time.sleep(0.5)
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        if script.running():
+            script.stop()
+            print "### %s stopped ###" % snapshot.name
 
 if __name__ == "__main__":
     try:
